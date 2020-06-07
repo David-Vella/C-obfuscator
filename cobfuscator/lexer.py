@@ -39,7 +39,9 @@ def grab_token(f):
 
         # string literal handler
         if char == '\"':
-            char += grab_until(f, '\"') #!!! f was src
+            char += grab_until(f, '\"')
+        if char == '\'':
+            char += grab_until(f, '\'')
 
         if char in delimiters:
 
@@ -91,5 +93,7 @@ def tokenize(src, dst):
         # ignore macros
         elif out[0] == '#':
             out += grab_until(src, '\n')
+            dst.write('{}'.format(out))
 
-        dst.write('{} '.format(out))
+        else:
+            dst.write('{}\n'.format(out))
