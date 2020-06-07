@@ -1,43 +1,66 @@
 import sys, os
 
-from cobfuscator import whitespace
+def glob(src_files, dst_file):
+    with open(dst_file, mode='w', encoding='utf-8') as dst:
+        included = []
 
-def grab_string(f):
-    string = ''
-    while True:
-        char = f.read(1)
+        for src in src_files:
 
-        if not char:
-            if len(string):
-                break
+            with open(src, mode='r', encoding='utf-8') as src:
+
+                for line in src:
+
+                    line = line.strip()
+
+                    if line[:8] == '#include':
+
+                        if line not in included:
+
+                            included.append(line)
+
+                            if '<' not in line:
+                                line = line.split()[1]
+                                line = line.replace('\"','')
+                                line = line.replace('\n','')
+                                dump(line, dst, included)
+                            else:
+                                dst.write(line + '\n')
+                    else:
+                        dst.write(line + '\n')
+
+def dump(src_file, dst, ignore=[]):
+    with open(src_file, 'r') as src:
+
+        for line in src:
+
+            line = line.strip()
+
+            if line not in ignore:
+
+                dst.write(line + '\n')
+
+def process(src):
+    definitions = {}
+    defined = []
+
+    for line in src:
+
+        line = line.strip()
+
+        if line[:7] == '#define':
+
+            if len(line.split()) == 2:
+                defined.append(line.split()[1])
             else:
-                return(False)
+                key = line.split()[1]
+                val = line.split()[2]
 
-        if char in whitespace:
-            if len(string):
-                return(string)
-            else:
-                continue
-        
-        string += char
+                definition = line.split()[3:]
 
-def process(src, dst):
-    definitions = []
-    includes = []
+                for string in definition:
+                    val += ' ' + string
 
-    while True:
-        string = grab_string(src)
-        
-        if not string:
-            break
+                definitions[key] = val
 
-        if string == '#include':
-            lib = grab_string(src)
-            if lib[0] == '\"':
-                includes.append(lib.replace('\"', ''))
-
-        if string == '#define':
-            definitions.append(grab_string(src))
-
+    print(defined)
     print(definitions)
-    print(includes)
