@@ -1,32 +1,39 @@
 import sys, os
 
-def glob(src_files, dst_file):
-    with open(dst_file, mode='w', encoding='utf-8') as dst:
-        included = []
+def glob(src_files, dst):
+    included = []
 
-        for src in src_files:
+    for src in src_files:
 
-            with open(src, mode='r', encoding='utf-8') as src:
+        print(src)
 
-                for line in src:
+        with open(src, mode='r', encoding='utf-8') as src:
 
-                    line = line.strip()
+            for line in src:
 
-                    if line[:8] == '#include':
+                line = line.strip()
 
-                        if line not in included:
+                if line[:8] == '#include':
 
-                            included.append(line)
+                    if line not in included:
 
-                            if '<' not in line:
-                                line = line.split()[1]
-                                line = line.replace('\"','')
-                                line = line.replace('\n','')
-                                dump(line, dst, included)
-                            else:
-                                dst.write(line + '\n')
-                    else:
-                        dst.write(line + '\n')
+                        included.append(line)
+
+                        if '<' not in line:
+
+                            line = line.split()[1]
+                            line = line.replace('\"','')
+                            line = line.replace('\n','')
+
+                            files = []
+                            files.append(line)
+
+                            glob(files, dst)
+
+                        else:
+                            dst.write(line + '\n')
+                else:
+                    dst.write(line + '\n')
 
 def dump(src_file, dst, ignore=[]):
     with open(src_file, 'r') as src:
