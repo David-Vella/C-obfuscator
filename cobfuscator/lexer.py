@@ -90,10 +90,30 @@ def tokenize(src, dst):
         if not out:
             break
 
+        elif out[:8] == '#include': #handle in tokenize?
+            next_token = grab_token(src)
+            if next_token == '<':
+                next_token += grab_token(src) + grab_token(src)
+            out += ' ' + next_token
+            print(out)
+            dst.write('{}\n'.format(out))
+
         # ignore macros
-        elif out[0] == '#':
-            out += grab_until(src, '\n')
-            dst.write('{}'.format(out))
+        elif out[:7] == '#define': # tripped up by inline comments
+            while True:
+                if src.read(1) == '\n':
+                    break
+                else:
+                    src.seek(src.tell() - 1, os.SEEK_SET)
+                    next_token = grab_token(src)
+                    if next_token != '(':
+                        out += ' '
+                    out += next_token
+            dst.write('{}\n'.format(out))
+        
+        elif out[:1] == '#':
+            out += grab_until(src,'\n')
+            dst.write(out)
 
         else:
             dst.write('{}\n'.format(out))
