@@ -1,37 +1,32 @@
 import sys, os
 
 def glob(src_files, dst):
+
     included = []
 
     for src in src_files:
 
-        print(src)
-
         with open(src, mode='r', encoding='utf-8') as src:
 
             for line in src:
-
+                
                 line = line.strip()
 
-                if line[:8] == '#include':
+                if line[:8] == '#include' and line not in included:
 
-                    if line not in included:
+                    included.append(line)
 
-                        included.append(line)
+                    if '<' not in line:
 
-                        if '<' not in line:
+                        line = line.split()[1]
+                        line = line.replace('\"','').replace('\n','')
 
-                            line = line.split()[1]
-                            line = line.replace('\"','')
-                            line = line.replace('\n','')
+                        files = [line]
+                        glob(files, dst)
 
-                            files = []
-                            files.append(line)
-
-                            glob(files, dst)
-
-                        else:
-                            dst.write(line + '\n')
+                    else:
+                        dst.write(line + '\n')
+                        
                 else:
                     dst.write(line + '\n')
 
