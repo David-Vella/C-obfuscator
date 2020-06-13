@@ -2,6 +2,24 @@ import sys, os
 
 from cobfuscator import whitespace, delimiters, operators
 
+class token:
+    def __init__(self, string='', family=None):
+        self.string = string
+        self.family = family
+
+    def __repr__(self):
+        return('{} : {}'.format(self.family, self.string))
+
+    def __len__(self):
+        return(len(self.string))
+
+    def __add__(self, other):
+        try:
+            return(self.string + other)
+        except AttributeError:
+            return(self.string + other.string)
+
+
 def grab_until(f, delimiter, offset=0):
     '''
     Returns a string 
@@ -82,6 +100,27 @@ def grab_token(f):
         else:
             string += char
     return(string)
+
+def string_list(src):
+
+    result = []
+
+    out = grab_token(src)
+
+    while out:
+
+        if out[:1] == '#':
+
+            out += grab_until(src, '\n')
+            result.append(out.strip())
+        
+        else:
+            result.append(out)
+
+        out = grab_token(src)
+
+    return(result)
+
 
 def tokenize(src, dst):
     while True:
