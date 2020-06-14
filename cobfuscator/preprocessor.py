@@ -57,56 +57,91 @@ def glob(src_files, dst):
                 
                 line = line.strip()
 
-                if line[:8] == '#include' and line not in included:
+                if line[:8] == '#include':
 
-                    included.append(line)
+                    if line not in included:
 
-                    if '<' not in line:
+                        included.append(line)
 
-                        line = line.split()[1]
-                        line = line.replace('\"','').replace('\n','')
+                        if '<' not in line:
 
-                        files = [line]
-                        glob(files, dst)
+                            line = line.split()[1]
+                            line = line.replace('\"','').replace('\n','')
 
-                    else:
-                        dst.write(line + '\n')
+                            files = [line]
+                            glob(files, dst)
+
+                        else:
+                            dst.write(line + '\n')
 
                 else:
                     dst.write(line + '\n')
 
         os.remove(dst_file)
 
-def process(src):
-    definitions = {}
-    defined = []
+def process(src_files, dst):
+    glob_file = 'glob.c'
+    token_file = 'tokens.c'
 
-    for line in src:
+    with open(glob_file, mode='w', encoding='utf-8') as glb:
+        glob(src_files, glb)
 
-        line = line.strip()
+    with open(token_file, mode='w', encoding='utf-8') as d:
+        with open(glob_file, mode='r', encoding='utf-8') as s:
+            lexer.tokenize(s, d)
 
-        if line[:7] == '#define':
+    with open(token_file, mode='r', encoding='utf-8') as src:
+        definitions = {}
+        defined = []
 
-            if len(line.split()) == 2:
-                defined.append(line.split()[1])
-            else:
-                key = line.split()[1]
-                val = line.split()[2]
+        for line in src:
 
-                definition = line.split()[3:]
+            line = line.strip()
 
-                for string in definition:
-                    val += ' ' + string
+            while line in list(definitions.keys()):
+                line = definitions[line]
 
-                definitions[key] = val
+            if line[:7] == '#define':
 
-    # with open('processed.c', mode='w', encoding='utf-8') as dst:
+                if len(line.split()) == 2:
+                    defined.append(line.split()[1])
+                else:
+                    key = line.split()[1]
+                    val = line.split()[2]
 
-    # with open('processed.c', mode='w', encoding='utf-8') as dst:
-        
-    #     for line in src:
+                    definition = line.split()[3:]
 
+                    for string in definition:
+                        val += ' ' + string
 
+                    definitions[key] = val
 
-    # print(defined)
-    # print(definitions)
+                continue
+
+            if line[:6] == '#ifdef':
+                line = line.split()[1]
+                if line not in defined:
+                    while line.strip() != '#endif':
+                        line = src.readline()
+                continue
+
+            if line[:7] == '#ifndef':
+                line = line.split()[1]
+                if line in defined:
+                    while line.strip() != '#endif':
+                        line = src.readline()
+                continue
+
+            if line[:6] == '#undef':
+                line = line.split()[1]
+                if line in defined:
+                    defined.remove(line)
+                continue
+
+            if line[:6] == '#endif':
+                continue
+
+            dst.write(line + '\n')
+    
+    os.remove('tokens.c')
+    os.remove('glob.c')

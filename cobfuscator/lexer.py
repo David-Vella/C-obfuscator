@@ -134,7 +134,6 @@ def tokenize(src, dst):
             if next_token == '<':
                 next_token += grab_token(src) + grab_token(src)
             out += ' ' + next_token
-            print(out)
             dst.write('{}\n'.format(out))
 
         # ignore macros
