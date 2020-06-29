@@ -1,12 +1,39 @@
-for i in {1..100}; do
-    PROGOUT=$(python3 cobfuscator tictactoe.c main.c)
-    OUTPUT=$(gcc main.obf.c tictactoe.obf.c -lncurses 2>&1)
+#!/bin/bash
 
-    if [[ $OUTPUT == *warning* || $? -ne 0 ]]; then
-        echo "$OUTPUT"
-        echo "Failed to compile"
+FLAGS="-Werror -Wall -lncurses"
+
+run_test() {
+
+    local name=$(echo $1 | cut -d'.' -f1)
+
+    echo -n "Running Test $name..."
+
+    cd tests/$name/
+
+    local files=$(ls)
+
+    cd ../../
+
+    cp -r tests/$name/* .
+
+    python cobfuscator "$@"
+
+    gcc $FLAGS out.c > tests/compiler.log 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "Failed"
+
+        rm $files
+
         exit 1
-    fi
-done
 
-echo "Success"
+    else
+        echo "Passed"
+    fi
+
+    rm $files
+}
+
+run_test hello.c
+
+run_test tictactoe.c main.c
