@@ -20,18 +20,17 @@ run_test() {
 
     gcc $FLAGS out.c > tests/compiler.log 2>&1
 
-    if [ $? -ne 0 ]; then
+    local status="$?"
+
+    rm $files
+
+    if [ $status -ne 0 ]; then
         echo "Failed"
-
-        rm $files
-
         exit 1
 
     else
         echo "Passed"
     fi
-
-    rm $files
 }
 
 run_test hello.c
