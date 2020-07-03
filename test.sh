@@ -16,7 +16,7 @@ run_test() {
 
     cp -r tests/$name/* .
 
-    python cobfuscator "$@"
+    python -m cobfuscator "$@"
 
     gcc $FLAGS out.c > tests/compiler.log 2>&1
 

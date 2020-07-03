@@ -1,8 +1,3 @@
-import json
+from .preprocessor import process
 
-with open('cobfuscator/cthings.json') as cthings_file:
-    cthings = json.load(cthings_file)
-
-whitespace = cthings['whitespace']
-operators = cthings['operators']
-delimiters = whitespace + operators + cthings['other']
+__all__ = ('process')

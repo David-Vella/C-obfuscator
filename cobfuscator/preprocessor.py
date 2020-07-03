@@ -1,4 +1,6 @@
-import sys, os, lexer
+import sys, os
+
+from .lexer import tokenize
 
 def uncomment(src, dst):
 
@@ -88,7 +90,7 @@ def process(src_files, dst):
 
     with open(token_file, mode='w', encoding='utf-8') as d:
         with open(glob_file, mode='r', encoding='utf-8') as s:
-            lexer.tokenize(s, d)
+            tokenize(s, d)
 
     with open(token_file, mode='r', encoding='utf-8') as src:
         definitions = {}
@@ -107,12 +109,9 @@ def process(src_files, dst):
                     defined.append(line.split()[1])
                 else:
                     key = line.split()[1]
-                    val = line.split()[2]
 
-                    definition = line.split()[3:]
-
-                    for string in definition:
-                        val += ' ' + string
+                    val = line.split()[2:]
+                    val = ' '.join(val)
 
                     definitions[key] = val
 
@@ -142,6 +141,6 @@ def process(src_files, dst):
                 continue
 
             dst.write(line + '\n')
-    
+
     os.remove('tokens.c')
     os.remove('glob.c')

@@ -1,6 +1,11 @@
-import sys, os
+import sys, os, json
 
-from cobfuscator import whitespace, delimiters, operators
+with open('cobfuscator/cthings.json') as cthings_file:
+    cthings = json.load(cthings_file)
+
+whitespace = cthings['whitespace']
+operators = cthings['operators']
+delimiters = whitespace + operators + cthings['other']
 
 class token:
     def __init__(self, string='', family=None):
@@ -121,6 +126,25 @@ def string_list(src):
 
     return(result)
 
+def token_list(src):
+
+    result = []
+
+    out = grab_token(src)
+
+    while out:
+
+        if out[:1] == '#':
+
+            out += grab_until(src, '\n')
+            result.append(out.strip())
+        
+        else:
+            result.append(out)
+
+        out = grab_token(src)
+
+    return(result)
 
 def tokenize(src, dst):
     while True:
@@ -155,3 +179,4 @@ def tokenize(src, dst):
 
         else:
             dst.write('{}\n'.format(out))
+            
