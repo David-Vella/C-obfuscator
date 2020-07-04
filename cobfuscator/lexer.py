@@ -1,13 +1,17 @@
-import sys, os, json
+import sys, os, json, re, random
+import string as string_things
 
 with open('cobfuscator/cthings.json') as cthings_file:
     cthings = json.load(cthings_file)
 
 whitespace = cthings['whitespace']
 operators = cthings['operators']
-delimiters = whitespace + operators + cthings['other']
+symbols = cthings['symbols']
+delimiters = whitespace + operators + symbols
+types = cthings['types']
+keywords = types + cthings['keywords']
 
-class token:
+class Token:
     def __init__(self, string='', family=None):
         self.string = string
         self.family = family
@@ -23,6 +27,21 @@ class token:
             return(self.string + other)
         except AttributeError:
             return(self.string + other.string)
+
+    STRING_LITERAL = 'string literal'
+    CHAR_LITERAL = 'char literal'
+    INT_LITERAL = 'int literal'
+    FLOAT_LITERAL = 'float literal'
+
+    CONSTANT = 'constant'
+    NAME = 'name'
+    DIRECTIVE = 'directive'
+
+    SYMBOL = 'symbol'
+    KEYWORD = 'keyword'
+    OPERATOR = 'operator'
+
+    LIBRARY = 'library defined'
 
 
 def grab_until(f, delimiter, offset=0):
@@ -128,23 +147,53 @@ def string_list(src):
 
 def token_list(src):
 
-    result = []
+    tokens = []
+    names = []
 
-    out = grab_token(src)
+    for string in string_list(src):
+        tokens.append(Token(string=string))
 
-    while out:
+    for i in range(len(tokens)):
+        if tokens[i].string in names:
+            tokens[i].family = Token.NAME
 
-        if out[:1] == '#':
+        elif tokens[i].string[:1] == '#':
+            tokens[i].family = Token.DIRECTIVE
 
-            out += grab_until(src, '\n')
-            result.append(out.strip())
+        elif tokens[i].string[0] == '\"' and tokens[i].string[-1] == '\"':
+            tokens[i].family = Token.STRING_LITERAL
+            
+        elif tokens[i].string[0] == '\'' and tokens[i].string[-1] == '\'':
+            tokens[i].family = Token.CHAR_LITERAL
+
+        elif re.search('^[0-9]+$', tokens[i].string):
+            tokens[i].family = Token.INT_LITERAL
+
+        elif re.search('^[0-9]+[.][0-9]+$', tokens[i].string):
+            tokens[i].family = Token.FLOAT_LITERAL
+
+        elif tokens[i].string in keywords:
+            tokens[i].family = Token.KEYWORD
+
+        elif tokens[i].string in symbols:
+            tokens[i].family = Token.SYMBOL
+
+        elif tokens[i].string in operators:
+            tokens[i].family = Token.OPERATOR
+
+        elif tokens[i].string != tokens[-1].string != tokens[0].string:
+            offset = 1
+            while tokens[i - offset].string == '*':
+                offset += 1
+            if tokens[i - offset].family == Token.KEYWORD:
+                tokens[i].family = Token.NAME
+                names.append(tokens[i].string)
         
-        else:
-            result.append(out)
+            else:
+                tokens[i].family = Token.LIBRARY
 
-        out = grab_token(src)
+    return(tokens)
 
-    return(result)
 
 def tokenize(src, dst):
     while True:
@@ -152,26 +201,6 @@ def tokenize(src, dst):
 
         if not out:
             break
-
-        elif out[:8] == '#include': #handle in tokenize?
-            next_token = grab_token(src)
-            if next_token == '<':
-                next_token += grab_token(src) + grab_token(src)
-            out += ' ' + next_token
-            dst.write('{}\n'.format(out))
-
-        # ignore macros
-        elif out[:7] == '#define': # tripped up by inline comments
-            while True:
-                if src.read(1) == '\n':
-                    break
-                else:
-                    src.seek(src.tell() - 1, os.SEEK_SET)
-                    next_token = grab_token(src)
-                    if next_token != '(':
-                        out += ' '
-                    out += next_token
-            dst.write('{}\n'.format(out))
         
         elif out[:1] == '#':
             out += grab_until(src,'\n')
@@ -179,4 +208,3 @@ def tokenize(src, dst):
 
         else:
             dst.write('{}\n'.format(out))
-            

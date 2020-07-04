@@ -1,12 +1,10 @@
 {
-    "whitespace": 
-    [ 
+    "whitespace": [ 
         "\n", 
         "\t", 
         " " 
     ],
-    "operators": 
-    [
+    "operators": [
         "++",
         "--",
         "!",
@@ -50,13 +48,55 @@
         "?",
         ":"
     ],
-    "other": 
-    [
+    "symbols": [
         ",",
         ";",
         "{",
         "}",
         ")",
         "]"
+    ],
+    "keywords": [
+        "break",
+        "case",
+        "const",
+        "continue",
+        "default",
+        "do",
+        "else",
+        "enum",
+        "extern",
+        "for",
+        "goto",
+        "if",
+        "register",
+        "return",
+        "signed",
+        "sizeof",
+        "static",
+        "struct",
+        "switch",
+        "typedef",
+        "union",
+        "unsigned",
+        "volatile",
+        "while",
+        "main"
+    ],
+    "types": [
+        "auto",
+        "char",
+        "double",
+        "float",
+        "void",
+        "short",
+        "long",
+        "int",
+        "int8_t",
+        "int16_t",
+        "int32_t",
+        "uint8_t",
+        "uint16_t",
+        "uint32_t"
     ]
 }
