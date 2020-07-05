@@ -39,6 +39,7 @@ class Token:
 
     SYMBOL = 'symbol'
     KEYWORD = 'keyword'
+    TYPE = 'type'
     OPERATOR = 'operator'
 
     LIBRARY = 'library defined'
@@ -58,7 +59,6 @@ def grab_until(f, delimiter, offset=0):
         char = f.read(1)
         string += char
         if string[-len(delimiter):] == delimiter:
-        #if char == delimiter:
             break
     return(string)
 
@@ -172,6 +172,9 @@ def token_list(src):
         elif re.search('^[0-9]+[.][0-9]+$', tokens[i].string):
             tokens[i].family = Token.FLOAT_LITERAL
 
+        elif tokens[i].string in types:
+            tokens[i].family = Token.TYPE
+
         elif tokens[i].string in keywords:
             tokens[i].family = Token.KEYWORD
 
@@ -185,7 +188,7 @@ def token_list(src):
             offset = 1
             while tokens[i - offset].string == '*':
                 offset += 1
-            if tokens[i - offset].family == Token.KEYWORD:
+            if tokens[i - offset].family == Token.TYPE:
                 tokens[i].family = Token.NAME
                 names.append(tokens[i].string)
         

@@ -3,6 +3,7 @@
 
 tmp/
 out.c
+obfuscated.c
 a.out
 
 flow.md

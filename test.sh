@@ -18,7 +18,7 @@ run_test() {
 
     python -m cobfuscator "$@"
 
-    gcc $FLAGS out.c > tests/compiler.log 2>&1
+    gcc $FLAGS obfuscated.c > tests/compiler.log 2>&1
 
     local status="$?"
 
