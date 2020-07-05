@@ -47,10 +47,10 @@ def obfuscate(src, dst):
 
     for i in range(len(tokens)):
         if tokens[i].family == Token.INT_LITERAL:
-            tokens[i].string = str(hex(int(tokens[i].string)))
+            tokens[i].string = hex(int(tokens[i].string))
 
         elif tokens[i].family == Token.CHAR_LITERAL:
-            tokens[i].string = str(ord(tokens[i].string.replace('\'', '')))
+            tokens[i].string = hex(ord(tokens[i].string.replace('\'', '')))
 
         elif tokens[i].family == Token.STRING_LITERAL:
             tokens[i].string = handle_string(tokens[i].string)
@@ -63,7 +63,7 @@ def obfuscate(src, dst):
                 names[tokens[i].string] = name
 
             tokens[i].string = names[tokens[i].string]
-        
+
         if tokens[i].family == Token.DIRECTIVE:
             dst.write('{}\n'.format(tokens[i].string))
             continue
@@ -95,4 +95,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

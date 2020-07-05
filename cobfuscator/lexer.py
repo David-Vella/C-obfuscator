@@ -191,7 +191,7 @@ def token_list(src):
             if tokens[i - offset].family == Token.TYPE:
                 tokens[i].family = Token.NAME
                 names.append(tokens[i].string)
-        
+
             else:
                 tokens[i].family = Token.LIBRARY
 
@@ -204,7 +204,7 @@ def tokenize(src, dst):
 
         if not out:
             break
-        
+
         elif out[:1] == '#':
             out += grab_until(src,'\n')
             dst.write(out)

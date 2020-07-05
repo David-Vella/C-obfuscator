@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FLAGS="-Werror -Wall -lncurses"
+FLAGS="-lncurses"
 
 run_test() {
 
