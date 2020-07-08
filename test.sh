@@ -35,4 +35,6 @@ run_test() {
 
 run_test hello.c
 
+run_test loop.c
+
 run_test tictactoe.c main.c

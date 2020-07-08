@@ -3,7 +3,7 @@ import sys, os, string, random
 from cobfuscator import process, token_list, Token
 
 def generate_name(length=4):
-    letters = string.ascii_letters
+    letters = string.ascii_lowercase
 
     name = []
     
@@ -13,6 +13,9 @@ def generate_name(length=4):
     return(''.join(name))
 
 def handle_string(string):
+    if '\\x' in string:
+        return(string)
+
     result = ['\"']
 
     escape = { 'n' : '\n', 't' : '\t' }
