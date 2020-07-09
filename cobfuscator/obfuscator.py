@@ -13,9 +13,6 @@ def generate_name(length=4):
     return(''.join(name))
 
 def handle_string(string):
-    if '\\x' in string:
-        return(string)
-
     result = ['\"']
 
     escape = { 'n' : '\n', 't' : '\t' }
@@ -23,10 +20,17 @@ def handle_string(string):
     for i in range(len(string)):
         if string[i] == '\"':
             continue
+
+        elif '\\x' in string[max(0, i - 3) : i + 2]:
+            result.append(string[i])
+            continue
+
         elif string[i] == '\\' and string[i - 1] != '\\':
             continue
+
         elif string[i - 1] == '\\':
             num = str(hex(ord(escape[string[i]]))).replace('0x', '')
+
         else:
             num = str(hex(ord(string[i]))).replace('0x', '')
 
@@ -50,7 +54,8 @@ def obfuscate(src, dst):
 
     for i in range(len(tokens)):
         if tokens[i].family == Token.INT_LITERAL:
-            tokens[i].string = hex(int(tokens[i].string))
+            if '0x' not in tokens[i].string and '0b' not in tokens[i].string:
+                tokens[i].string = hex(int(tokens[i].string))
 
         elif tokens[i].family == Token.CHAR_LITERAL:
             tokens[i].string = hex(ord(tokens[i].string.replace('\'', '')))

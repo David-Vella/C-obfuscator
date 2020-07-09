@@ -166,7 +166,9 @@ def token_list(src):
         elif tokens[i].string[0] == '\'' and tokens[i].string[-1] == '\'':
             tokens[i].family = Token.CHAR_LITERAL
 
-        elif re.search('^[0-9]+$', tokens[i].string):
+        elif re.search('^[0-9]+$', tokens[i].string) or \
+             re.search('^(0x)[0-9a-f]+$', tokens[i].string) or \
+             re.search('^(0b)[01]+$', tokens[i].string):
             tokens[i].family = Token.INT_LITERAL
 
         elif re.search('^[0-9]+[.][0-9]+$', tokens[i].string):
