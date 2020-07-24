@@ -1,6 +1,17 @@
-#!/bin/bash
+#!/bin/sh
 
 FLAGS="-lncurses"
+
+FAILURES=0
+SUCCESSES=0
+
+for arg in $@; do
+    if [ $arg == "-a" ]; then
+        ALL=1
+    fi
+done
+
+echo "C-Obfucscator compiler log" > compiler.log
 
 run_test() {
 
@@ -8,33 +19,41 @@ run_test() {
 
     echo -n "Running Test $name..."
 
-    cd tests/$name/
+    local files=$(ls tests/$name)
 
-    local files=$(ls)
+    cp -r tests/$name/* ./
 
-    cd ../../
+    python -m cobfuscator $@
 
-    cp -r tests/$name/* .
+    echo -n "Test $name: " >> compiler.log
 
-    python -m cobfuscator "$@"
-
-    gcc $FLAGS obfuscated.c > tests/compiler.log 2>&1
-
-    local status="$?"
+    local output=$(gcc $FLAGS obfuscated.c 2>&1)
 
     rm $files
 
-    if [ $status -ne 0 ]; then
-        echo "Failed"
-        exit 1
-
-    else
+    if [ -z "$output" ]; then
         echo "Passed"
+
+        echo "None" >> compiler.log
+
+        ((SUCCESSES+=1))
+    else
+        echo "Failed"
+
+        echo -e "\n$output" >> compiler.log
+
+        ((FAILURES+=1))
     fi
 }
 
+print_summary() {
+    echo -e "\n==== SUMMARY ===="
+    echo "Successes: $SUCCESSES"
+    echo "Failures: $FAILURES"
+}
+
 run_test hello.c
-
 run_test loop.c
-
 run_test tictactoe.c main.c
+
+print_summary
