@@ -5,16 +5,11 @@ FLAGS="-lncurses"
 FAILURES=0
 SUCCESSES=0
 
-for arg in $@; do
-    if [ $arg == "-a" ]; then
-        ALL=1
-    fi
-done
+function get_time {
+    echo $(($(date +%s%N)/1000000))
+}
 
-echo "C-Obfucscator compiler log" > compiler.log
-
-run_test() {
-
+function run_test {
     local name=$(echo $1 | cut -d'.' -f1)
 
     echo -n "Running Test $name..."
@@ -24,33 +19,46 @@ run_test() {
     cp -r tests/$name/* ./
 
     python -m cobfuscator $@
+    local obfuscate=$?
 
     echo -n "Test $name: " >> compiler.log
 
     local output=$(gcc $FLAGS obfuscated.c 2>&1)
+    local compile=$?
 
     rm $files
 
-    if [ -z "$output" ]; then
+    if [[ $compile -eq 0 && $obfuscate -eq 0 ]]; then
         echo "Passed"
-
-        echo "None" >> compiler.log
-
         ((SUCCESSES+=1))
     else
         echo "Failed"
-
-        echo -e "\n$output" >> compiler.log
-
         ((FAILURES+=1))
+    fi
+
+    if [ -z "$output" ]; then
+        echo "None" >> compiler.log
+    else
+        echo -e "\n$output" >> compiler.log
     fi
 }
 
-print_summary() {
+function print_summary {
     echo -e "\n==== SUMMARY ===="
     echo "Successes: $SUCCESSES"
     echo "Failures: $FAILURES"
+    echo -e "\nFinished in $(($(get_time)-START))ms"
 }
+
+for arg in $@; do
+    if [ $arg == "-a" ]; then
+        ALL=1
+    fi
+done
+
+echo "C-Obfucscator compiler log" > compiler.log
+
+START=$(get_time)
 
 run_test hello.c
 run_test loop.c

@@ -6,6 +6,4 @@ out.c
 obfuscated.c
 a.out
 
-flow.md
-
 compiler.log
