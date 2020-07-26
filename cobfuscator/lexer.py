@@ -53,11 +53,12 @@ def grab_until(f, delimiter, offset=0):
     
     Moves the file pointer forward in file f
     '''
-    string = ''
+    chars = []
     f.seek(f.tell() - offset, os.SEEK_SET)
     while True:
         char = f.read(1)
-        string += char
+        chars.append(char)
+        string = ''.join(chars)
         if string[-len(delimiter):] == delimiter:
             break
     return(string)
@@ -68,7 +69,7 @@ def grab_token(f):
 
     Moves the file pointer forward in file f
     '''
-    string = ''
+    string = []
 
     while True:
         char = f.read(1)
@@ -119,11 +120,11 @@ def grab_token(f):
                 if char in whitespace:
                     continue
                 else:
-                    string += char
+                    string.append(char)
                     break
         else:
-            string += char
-    return(string)
+            string.append(char)
+    return(''.join(string))
 
 def string_list(src):
 

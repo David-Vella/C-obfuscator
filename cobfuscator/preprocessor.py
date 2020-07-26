@@ -4,13 +4,13 @@ from .lexer import tokenize
 
 def uncomment(src, dst):
 
-    line = ''
+    line = []
 
     while True:
         char = src.read(1)
         
         if not char:
-            dst.write(line)
+            dst.write(''.join(line))
             return
 
         if char == '/': 
@@ -32,11 +32,11 @@ def uncomment(src, dst):
 
                 continue
 
-        line += char
+        line.append(char)
 
         if char == '\n':
-            dst.write(line)
-            line = ''
+            dst.write(''.join(line))
+            line.clear()
 
 def glob(src_files, dst):
 
