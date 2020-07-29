@@ -2,7 +2,6 @@
 *__pycache__*
 
 tmp/
-out.c
 obfuscated.c
 a.out
 
